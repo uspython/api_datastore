@@ -1,7 +1,4 @@
 library api_datastore;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export './src/apiservice.dart';
+export './src/apisettings.dart';
