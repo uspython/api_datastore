@@ -2,7 +2,7 @@
  * @Author: jeffzhao
  * @Date: 2019-03-17 12:08:06
  * @Last Modified by: jeffzhao
- * @Last Modified time: 2019-03-19 11:36:40
+ * @Last Modified time: 2019-03-19 14:51:13
  * Copyright Zhaojianfei. All rights reserved.
  */
 import 'dart:convert';
@@ -122,7 +122,7 @@ class ApiService {
   }
 
   static Future<Response<T>> _connect<T>(String path,
-      {Map<String, dynamic> params, Options options, CallbackOptions callbacks}) {
+      {Map<String, dynamic> params, Options options, @required CallbackOptions callbacks}) {
 
     (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
     // dio.interceptors.add(LogInterceptor(responseBody: false));
