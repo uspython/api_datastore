@@ -5,7 +5,7 @@
  * @Last Modified time: 2019-03-17 18:41:44
  * Copyright Zhaojianfei. All rights reserved.
  */
-
+import 'package:dio/dio.dart' show Interceptor;
 class ApiSettings {
   static final ApiSettings _s = ApiSettings._internal();
   factory ApiSettings() { return _s; }
@@ -19,4 +19,6 @@ class ApiSettings {
   int receiveTimeout = 60 * 1000;
   /// Default request header
   Map<String, String> requestHeader = {};
+  /// Default Global Interceptors
+  List<Interceptor> defaultInterceptors = [];
 }

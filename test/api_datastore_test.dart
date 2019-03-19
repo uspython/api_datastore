@@ -10,8 +10,8 @@ void main() {
   setUp(() {
     Intl.defaultLocale = "en Us";
     ApiSettings().baseUrl = 'https://jsonplaceholder.typicode.com';
-    ApiSettings().connectTimeout = 10000;
-    ApiSettings().receiveTimeout = 10000;
+    ApiSettings().connectTimeout = 60 * 1000;
+    ApiSettings().receiveTimeout = 60 * 1000;
     ApiSettings().requestHeader = {
       HttpHeaders.userAgentHeader:
           'Qingbnb/0.1.6/en (iPhone10,6; iOS)12.1; ${Intl.defaultLocale}',

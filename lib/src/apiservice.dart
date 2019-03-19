@@ -126,6 +126,7 @@ class ApiService {
 
     (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
     // dio.interceptors.add(LogInterceptor(responseBody: false));
+    dio.interceptors.addAll(ApiSettings().defaultInterceptors);
     dio.interceptors.addAll(callbacks.interceptors);
     return dio.request<T>(path, data: params, options: options);
 
