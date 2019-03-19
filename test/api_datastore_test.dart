@@ -5,13 +5,9 @@ import 'package:api_datastore/src/apiservice.dart';
 import 'package:api_datastore/src/apisettings.dart';
 import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
-
+import 'package:api_datastore/src/callback_options.dart';
 void main() {
   setUp(() {
-    // dio = new Dio();
-    // dio.options.baseUrl = 'https://jsonplaceholder.typicode.com';
-    // dio.options.headers = {'User-Agent': 'dartisan', 'XX': '8'};
-    // dio.httpClientAdapter = MockAdapter();
     Intl.defaultLocale = "en Us";
     ApiSettings().baseUrl = 'https://jsonplaceholder.typicode.com';
     ApiSettings().connectTimeout = 10000;
@@ -101,6 +97,36 @@ void main() {
       response = await ApiService.delete('/posts/1');
       print(response);
       expect(response.statusCode.toString().startsWith("2"), true);
+    });
+
+    test("request interceptor", () async {
+      Response response;
+      final interceptor = InterceptorsWrapper(
+        onRequest: (RequestOptions options) {
+          switch (options.path) {
+            case "/users/1":
+              return dio.resolve("fake data");
+            case "/posts/1":
+              return dio.reject("test interceptor error");
+            default:
+              return options;
+          }
+        }
+      );
+      response = await ApiService.get(
+        '/users/1',
+        callbacks: CallbackOptions(interceptors: [interceptor])
+      );
+      expect(response.data, "fake data");
+      try {
+        response = await ApiService.get(
+          '/posts/1',
+          callbacks: CallbackOptions(interceptors: [interceptor])
+        );
+        print("reject ${response.data}");
+      } on DioError catch (e) {
+        expect(e.message, 'test interceptor error');
+      }
     });
 
   });
