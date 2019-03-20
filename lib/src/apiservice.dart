@@ -126,8 +126,14 @@ class ApiService {
 
     (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
     // dio.interceptors.add(LogInterceptor(responseBody: false));
-    dio.interceptors.addAll(ApiSettings().defaultInterceptors);
-    dio.interceptors.addAll(callbacks.interceptors);
+    if (false == dio.interceptors.contains(ApiSettings().defaultInterceptors))
+      dio.interceptors.addAll(ApiSettings().defaultInterceptors);
+
+    callbacks.interceptors.forEach((item) {
+      if (false == dio.interceptors.contains(item))
+        dio.interceptors.add(item);
+    });
+
     return dio.request<T>(path, data: params, options: options);
 
   }
