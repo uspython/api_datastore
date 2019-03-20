@@ -134,10 +134,10 @@ class ApiService {
 
   /// Return a query string, [params] could be null
   static String stringify(Map<String, dynamic> params) {
-    if ((params ?? {}).keys.length == 0) return "";
+    if ((params ?? {}).keys.isEmpty) return "";
 
     final Map<String, String> p = Map.fromIterable(params.keys,
-        key: ($0) => $0, value: ($0) => params[$0].toString());
+        key: ($0) => '${$0}', value: ($0) => params[$0].toString());
     final outgoingUri = Uri(queryParameters: p);
     return outgoingUri.toString();
   }
