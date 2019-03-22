@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'apisettings.dart';
 import 'callback_options.dart';
 
-var dio = Dio(new BaseOptions(
+var dio = Dio(BaseOptions(
   baseUrl: ApiSettings().baseUrl,
   connectTimeout: ApiSettings().connectTimeout,
   receiveTimeout: ApiSettings().receiveTimeout,
@@ -30,13 +30,9 @@ var dio = Dio(new BaseOptions(
 //dio.interceptors..add(CookieManager(CookieJar()))..add(LogInterceptor());
 //(dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
 
-_parseAndDecode(String response) {
-  return jsonDecode(response);
-}
+dynamic _parseAndDecode(String response) => jsonDecode(response);
 
-parseJson(String text) {
-  return compute(_parseAndDecode, text);
-}
+dynamic _parseJson(String text) => compute(_parseAndDecode, text);
 
 class ApiService {
   /// Get method, [path] is url path, [params] is Map<String, dynamic>
@@ -49,7 +45,7 @@ class ApiService {
       {Map<String, dynamic> params, CallbackOptions callbacks}) {
     return _connect<T>(
       '$path${stringify(params)}',
-      options: Options(method: "GET"),
+      options: Options(method: 'GET'),
       callbacks: callbacks ?? CallbackOptions.fromEmpty()
     );
   }
@@ -66,9 +62,9 @@ class ApiService {
       path,
       params: params,
       options: Options(
-        method: "POST",
+        method: 'POST',
         contentType: ContentType.parse(
-                "application/x-www-form-urlencoded; charset=utf-8"),
+                'application/x-www-form-urlencoded; charset=utf-8'),
                 sendTimeout: 60 * 1000
         ),
       callbacks: callbacks ?? CallbackOptions.fromEmpty()
@@ -103,15 +99,15 @@ class ApiService {
     return _connect<T>(path,
         params: params,
         options: Options(
-          method: "PUT",
+          method: 'PUT',
           sendTimeout: 10 * 60 * 1000,
-          contentType: ContentType.parse("application/json; charset=UTF-8"),
+          contentType: ContentType.parse('application/json; charset=UTF-8'),
         ),
         callbacks: callbacks ?? CallbackOptions.fromEmpty()
         );
   }
 
-  /// Delete method, [path] is url path, [params] is Map<String, dynamic>
+  /// Delete method, [path] is url path
   ///
   /// ```dart
   ///ApiService.delete('/test');
@@ -124,18 +120,19 @@ class ApiService {
   static Future<Response<T>> _connect<T>(String path,
       {Map<String, dynamic> params, Options options, @required CallbackOptions callbacks}) {
 
-    (dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
+    (dio.transformer as DefaultTransformer).jsonDecodeCallback = _parseJson;
     // dio.interceptors.add(LogInterceptor(responseBody: false));
-    ApiSettings().defaultInterceptors.forEach((item) {
+    for (var item in ApiSettings().defaultInterceptors) {
       if (false == dio.interceptors.contains(item)) {
         dio.interceptors.add(item);
       }
-    });
-    callbacks.interceptors.forEach((item) {
+    }
+
+    for (var item in callbacks.interceptors) {
       if (false == dio.interceptors.contains(item)) {
         dio.interceptors.add(item);
       }
-    });
+    }
 
     return dio.request<T>(path, data: params, options: options);
 
@@ -143,9 +140,9 @@ class ApiService {
 
   /// Return a query string, [params] could be null
   static String stringify(Map<String, dynamic> params) {
-    if ((params ?? {}).keys.isEmpty) return "";
+    if ((params ?? {}).keys.isEmpty) return '';
 
-    final Map<String, String> p = Map.fromIterable(params.keys,
+    final p = Map.fromIterable(params.keys,
         key: ($0) => '${$0}', value: ($0) => params[$0].toString());
     final outgoingUri = Uri(queryParameters: p);
     return outgoingUri.toString();

@@ -8,7 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:api_datastore/src/callback_options.dart';
 void main() {
   setUp(() {
-    Intl.defaultLocale = "en Us";
+    Intl.defaultLocale = 'en Us';
     ApiSettings().baseUrl = 'https://jsonplaceholder.typicode.com';
     ApiSettings().connectTimeout = 60 * 1000;
     ApiSettings().receiveTimeout = 60 * 1000;
@@ -23,32 +23,32 @@ void main() {
   });
   group('ApiService', () {
     test('map<string, string> to query string', () {
-      expect(ApiService.stringify({"foo": "test1", "bar": "test2"}),
-          "?foo=test1&bar=test2");
-      expect(ApiService.stringify({"foo": "test1"}), "?foo=test1");
-      expect(ApiService.stringify({}), "");
-      expect(ApiService.stringify(null), "");
+      expect(ApiService.stringify({'foo': 'test1', 'bar': 'test2'}),
+          '?foo=test1&bar=test2');
+      expect(ApiService.stringify({'foo': 'test1'}), '?foo=test1');
+      expect(ApiService.stringify({}), '');
+      expect(ApiService.stringify(null), '');
     });
 
     test('get request without params', () async {
       Response response;
       response = await ApiService.get('/users/1');
       print(response);
-      expect(response.statusCode.toString().startsWith("2"), true);
+      expect(response.statusCode.toString().startsWith('2'), true);
     });
 
     test('get request with params', () async {
       Response response;
       response = await ApiService.get('/posts', params: { 'userId': 1, 'id': 4 });
       print(response.data);
-      expect(response.data[0]["title"], "eum et est occaecati");
+      expect(response.data[0]['title'], 'eum et est occaecati');
     });
 
     test('get request with text encoding params', () async {
       Response response;
       response = await ApiService.get('/posts', params: { 'userId': 1, 'title': 'qui est esse' });
       print(response.data);
-      expect(response.data[0]["title"], "qui est esse");
+      expect(response.data[0]['title'], 'qui est esse');
     });
 
     test('get request with chinese params', () async {
@@ -67,7 +67,7 @@ void main() {
 
     test('post data with params', () async {
       Response response;
-      response = await ApiService.post('/posts', params: { 'title': "foo", 'body': '测试', 'userid': 1 });
+      response = await ApiService.post('/posts', params: { 'title': 'foo', 'body': '测试', 'userid': 1 });
       print(response.data);
       expect(response.data['id'], 101);
       expect(response.data['body'], '测试');
@@ -77,7 +77,7 @@ void main() {
     test('postFormData with FormData', () async {
       /// 此测试api不支持form data
       Response response;
-      response = await ApiService.postForm('/posts', params: { 'title': "foo", 'body': '测试', 'userid': 1 });
+      response = await ApiService.postForm('/posts', params: { 'title': 'foo', 'body': '测试', 'userid': 1 });
       print(response.data);
       expect(response.data['id'], 101);
       expect(response.data['body'], '测试');
@@ -92,22 +92,22 @@ void main() {
       expect(response.data['title'], 'foo');
     });
 
-    test("delete method", () async {
+    test('delete method', () async {
       Response response;
       response = await ApiService.delete('/posts/1');
       print(response);
-      expect(response.statusCode.toString().startsWith("2"), true);
+      expect(response.statusCode.toString().startsWith('2'), true);
     });
 
-    test("request interceptor", () async {
+    test('request interceptor', () async {
       Response response;
       final interceptor = InterceptorsWrapper(
         onRequest: (RequestOptions options) {
           switch (options.path) {
-            case "/users/1":
-              return dio.resolve("fake data");
-            case "/posts/1":
-              return dio.reject("test interceptor error");
+            case '/users/1':
+              return dio.resolve('fake data');
+            case '/posts/1':
+              return dio.reject('test interceptor error');
             default:
               return options;
           }
@@ -117,15 +117,24 @@ void main() {
         '/users/1',
         callbacks: CallbackOptions(interceptors: [interceptor])
       );
-      expect(response.data, "fake data");
+      expect(response.data, 'fake data');
       try {
         response = await ApiService.get(
           '/posts/1',
           callbacks: CallbackOptions(interceptors: [interceptor])
         );
-        print("reject ${response.data}");
+        print('reject ${response.data}');
       } on DioError catch (e) {
         expect(e.message, 'test interceptor error');
+      }
+    });
+
+    test('test get token', () async {
+      try {
+        final _ = await ApiService.post('/accounts/login/',
+            params: {'username': 'jiangguangbin', 'password': '123456'});
+      } on DioError catch (e) {
+        print(e.response);
       }
     });
 

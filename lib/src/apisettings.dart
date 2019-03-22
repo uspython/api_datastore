@@ -12,7 +12,7 @@ class ApiSettings {
   ApiSettings._internal();
 
   /// Base api url
-  String baseUrl = "https://baidu.com/";
+  String baseUrl = 'https://baidu.com/';
   /// Connect time out (ms)
   int connectTimeout = 10 * 60 * 1000;
   /// Receive time out (ms)

@@ -7,8 +7,8 @@
  */
 import 'package:dio/dio.dart';
 class CallbackOptions {
-  CallbackOptions({ List<Interceptor> interceptors }): this.interceptors = interceptors ?? [];
-  CallbackOptions.fromEmpty() : this.interceptors = [];
+  CallbackOptions({ List<Interceptor> interceptors }): interceptors = interceptors ?? [];
+  CallbackOptions.fromEmpty() : interceptors = [];
 
   List<Interceptor> interceptors;
 }
