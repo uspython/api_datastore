@@ -2,14 +2,17 @@
  * @Author: jeffzhao
  * @Date: 2019-03-17 12:08:06
  * @Last Modified by: jeffzhao
- * @Last Modified time: 2019-03-19 14:51:13
+ * @Last Modified time: 2019-04-02 15:58:19
  * Copyright Zhaojianfei. All rights reserved.
  */
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+
 import 'apisettings.dart';
+import 'cache_interceptor.dart';
 import 'callback_options.dart';
 
 var dio = Dio(BaseOptions(
@@ -27,8 +30,6 @@ var dio = Dio(BaseOptions(
   },
   responseType: ResponseType.json,
 ));
-//dio.interceptors..add(CookieManager(CookieJar()))..add(LogInterceptor());
-//(dio.transformer as DefaultTransformer).jsonDecodeCallback = parseJson;
 
 dynamic _parseAndDecode(String response) => jsonDecode(response);
 
@@ -42,12 +43,12 @@ class ApiService {
   /// ```
   /// return a [Future<Response<T>>]
   static Future<Response<T>> get<T>(String path,
-      {Map<String, dynamic> params, CallbackOptions callbacks}) {
-    return _connect<T>(
-      '$path${stringify(params)}',
-      options: Options(method: 'GET'),
-      callbacks: callbacks ?? CallbackOptions.fromEmpty()
-    );
+      {Map<String, dynamic> params,
+      CallbackOptions callbacks,
+      bool needCached = false}) {
+    return _connect<T>('$path${stringify(params)}',
+        options: Options(method: 'GET', extra: {'needCached': needCached}),
+        callbacks: callbacks ?? CallbackOptions.fromEmpty());
   }
 
   /// Post method, [path] is url path, [params] is Map<String, dynamic>
@@ -58,17 +59,15 @@ class ApiService {
   /// return a [Future<Response<T>>]
   static Future<Response<T>> post<T>(String path,
       {Map<String, dynamic> params, CallbackOptions callbacks}) {
-    return _connect<T>(
-      path,
-      params: params,
-      options: Options(
-        method: 'POST',
-        contentType: ContentType.parse(
+    return _connect<T>(path,
+        params: params,
+        options: Options(
+            method: 'POST',
+            contentType: ContentType.parse(
                 'application/x-www-form-urlencoded; charset=utf-8'),
-                sendTimeout: 60 * 1000
-        ),
-      callbacks: callbacks ?? CallbackOptions.fromEmpty()
-      );
+            sendTimeout: 60 * 1000,
+            extra: {'needCached': false}),
+        callbacks: callbacks ?? CallbackOptions.fromEmpty());
   }
 
   /// Post form data method, [path] is url path, [params] is Map<String, dynamic>
@@ -80,12 +79,13 @@ class ApiService {
   static Future<Response<T>> postForm<T>(String path,
       {Map<String, dynamic> params, CallbackOptions callbacks}) {
     final formData = FormData.from(params);
-    return _connect<T>(
-      path,
-      params: formData,
-      options: Options(method: 'POST', sendTimeout: 10 * 60 * 1000),
-      callbacks: callbacks ?? CallbackOptions.fromEmpty()
-    );
+    return _connect<T>(path,
+        params: formData,
+        options: Options(
+            method: 'POST',
+            sendTimeout: 10 * 60 * 1000,
+            extra: {'needCached': false}),
+        callbacks: callbacks ?? CallbackOptions.fromEmpty());
   }
 
   /// Put method, [path] is url path, [params] is Map<String, dynamic>
@@ -99,12 +99,11 @@ class ApiService {
     return _connect<T>(path,
         params: params,
         options: Options(
-          method: 'PUT',
-          sendTimeout: 10 * 60 * 1000,
-          contentType: ContentType.parse('application/json; charset=UTF-8'),
-        ),
-        callbacks: callbacks ?? CallbackOptions.fromEmpty()
-        );
+            method: 'PUT',
+            sendTimeout: 10 * 60 * 1000,
+            contentType: ContentType.parse('application/json; charset=UTF-8'),
+            extra: {'needCached': false}),
+        callbacks: callbacks ?? CallbackOptions.fromEmpty());
   }
 
   /// Delete method, [path] is url path
@@ -113,13 +112,16 @@ class ApiService {
   ///ApiService.delete('/test');
   /// ```
   /// return a [Future<Response<T>>]
-  static Future<Response<T>> delete<T>(String path, { CallbackOptions callbacks }) {
-    return _connect<T>(path, callbacks: callbacks ?? CallbackOptions.fromEmpty());
+  static Future<Response<T>> delete<T>(String path,
+      {CallbackOptions callbacks}) {
+    return _connect<T>(path,
+        callbacks: callbacks ?? CallbackOptions.fromEmpty());
   }
 
   static Future<Response<T>> _connect<T>(String path,
-      {Map<String, dynamic> params, Options options, @required CallbackOptions callbacks}) {
-
+      {Map<String, dynamic> params,
+      Options options,
+      @required CallbackOptions callbacks}) {
     (dio.transformer as DefaultTransformer).jsonDecodeCallback = _parseJson;
     // dio.interceptors.add(LogInterceptor(responseBody: false));
     for (var item in ApiSettings().defaultInterceptors) {
@@ -134,8 +136,11 @@ class ApiService {
       }
     }
 
-    return dio.request<T>(path, data: params, options: options);
+    if (false == dio.interceptors.contains(CacheInterceptor.shared())) {
+      dio.interceptors.add(CacheInterceptor.shared());
+    }
 
+    return dio.request<T>(path, data: params, options: options);
   }
 
   /// Return a query string, [params] could be null
@@ -146,5 +151,11 @@ class ApiService {
         key: ($0) => '${$0}', value: ($0) => params[$0].toString());
     final outgoingUri = Uri(queryParameters: p);
     return outgoingUri.toString();
+  }
+
+  /// Clear Cache from Get Method
+  static void clearCache() {
+    CacheInterceptor.shared()..clearCache();
+    print('All cache clear');
   }
 }
