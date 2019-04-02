@@ -123,7 +123,11 @@ class ApiService {
       Options options,
       @required CallbackOptions callbacks}) {
     (dio.transformer as DefaultTransformer).jsonDecodeCallback = _parseJson;
-    // dio.interceptors.add(LogInterceptor(responseBody: false));
+
+    if (false == dio.interceptors.contains(CacheInterceptor.shared())) {
+      dio.interceptors.add(CacheInterceptor.shared());
+    }
+
     for (var item in ApiSettings().defaultInterceptors) {
       if (false == dio.interceptors.contains(item)) {
         dio.interceptors.add(item);
@@ -134,10 +138,6 @@ class ApiService {
       if (false == dio.interceptors.contains(item)) {
         dio.interceptors.add(item);
       }
-    }
-
-    if (false == dio.interceptors.contains(CacheInterceptor.shared())) {
-      dio.interceptors.add(CacheInterceptor.shared());
     }
 
     return dio.request<T>(path, data: params, options: options);
