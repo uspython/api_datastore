@@ -8,12 +8,15 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:api_datastore/src/apisettings.dart';
+import 'package:api_datastore/src/cache_interceptor.dart';
+import 'package:api_datastore/src/callback_options.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import 'apisettings.dart';
-import 'cache_interceptor.dart';
-import 'callback_options.dart';
+// import 'apisettings.dart';
+// import 'cache_interceptor.dart';
+// import 'callback_options.dart';
 
 var dio = Dio(BaseOptions(
   baseUrl: ApiSettings().baseUrl,

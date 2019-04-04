@@ -111,7 +111,7 @@ void main() {
         switch (options.path) {
           case '/users/1':
             return dio.resolve('fake data');
-          case '/posts/1':
+          case '/posts/100':
             return dio.reject('test interceptor error');
           default:
             return options;
@@ -121,7 +121,7 @@ void main() {
           callbacks: CallbackOptions(interceptors: [interceptor]));
       expect(response.data, 'fake data');
       try {
-        response = await ApiService.get('/posts/1',
+        response = await ApiService.get('/posts/100',
             callbacks: CallbackOptions(interceptors: [interceptor]));
         print('reject ${response.data}');
       } on DioError catch (e) {
@@ -154,5 +154,28 @@ void main() {
       ApiService.clearCache();
       expect(cache.length, 0);
     });
+
+    test('await get posts from jsonplaceholder', () async {
+      const targetCount = 100;
+
+      final ids = List<int>();
+      var i = 1;
+      do {
+        ids.add(i);
+        i++;
+      } while (i <= targetCount);
+
+      final test = ids.map((id) {
+        final path = '/posts/$id';
+        return ApiService.get(path, needCached: true);
+      });
+
+      final result = await Future.wait(test);
+      final datas = result.map((r) => r.data);
+      for (var data in datas) {
+        print(data['title']);
+      }
+      expect(result.length, targetCount);
+    }, timeout: Timeout(Duration(seconds: 25)));
   });
 }
