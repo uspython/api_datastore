@@ -159,6 +159,6 @@ class ApiService {
   /// Clear Cache from Get Method
   static void clearCache() {
     CacheInterceptor.shared()..clearCache();
-    print('All cache clear');
+    print('[API DataStore]: All cache clear');
   }
 }

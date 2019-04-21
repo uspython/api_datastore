@@ -22,10 +22,10 @@ class CacheInterceptor extends Interceptor {
   dynamic onRequest(RequestOptions options) {
     final response = _cache[options.uri];
     if (options.extra['needCached'] == false) {
-      print('${options.uri}: force refresh or no cache, ignore cache! \n');
+      print('[API DataStore]: Ignore cache: ${options.uri} \n');
       return options;
     } else if (response != null) {
-      print('cache hit: ${options.uri} \n');
+      print('[API DataStore]: Cache hitted: ${options.uri} \n');
       return response;
     }
   }
